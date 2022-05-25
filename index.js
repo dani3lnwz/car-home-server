@@ -36,7 +36,7 @@ async function run(){
 
         const userCollection = client.db('all-in-one').collection('users');
 
-        const toolCollection = client.db('all-in-one').collection('tools');
+        // const toolCollection = client.db('all-in-one').collection('tools');
 
         app.get('/part', async(req, res) => {
             const query = {};
@@ -134,10 +134,10 @@ async function run(){
             res.send(result);
         });
 
-        // news
-        app.post('/tool', async(req, res) => {
+        // tool
+        app.post('/part', async(req, res) => {
             const tool = req.body;
-            const result = await toolCollection.insertOne(tool);
+            const result = await partCollection.insertOne(tool);
             res.send(result);
         })
     }
