@@ -21,6 +21,7 @@ function verifyJWT(req, res, next){
     const token = authHeader.split(' ')[1];
     jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, function(err, decoded){
         if(err){
+            console.log(err)
             return res.status(403).send({message: 'Forbidden access'})
         }
         req.decoded = decoded;
@@ -145,7 +146,15 @@ async function run(){
             const tool = req.body;
             const result = await partCollection.insertOne(tool);
             res.send(result);
-        })
+        });
+
+        // delete
+        app.delete('/part/:id',verifyJWT, verifyAdmin, async(req, res) => {
+            const id = req.params.id;
+            const filter = { _id: ObjectId(id) };
+            const result = await partCollection.deleteOne(filter);
+            res.send(result);
+        });
     }
     finally{
 
