@@ -5,6 +5,7 @@ require('dotenv').config();
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const app = express();
 const port = process.env.PORT || 5000;
+const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 
 app.use(cors());
 app.use(express.json())
@@ -21,7 +22,7 @@ function verifyJWT(req, res, next){
     const token = authHeader.split(' ')[1];
     jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, function(err, decoded){
         if(err){
-            console.log(err)
+
             return res.status(403).send({message: 'Forbidden access'})
         }
         req.decoded = decoded;
@@ -49,6 +50,19 @@ async function run(){
                 res.status(403).send({message: 'forbidden'});
             }
         }
+        // payment
+
+        app.post('/create-payment-intent', verifyJWT, async(req, res) =>{
+            const part = req.body;
+            const price = part.price;
+            const amount = price*100;
+            const paymentIntent = await stripe.paymentIntents.create({
+                amount : amount,
+                currency: 'usd',
+                payment_method_types: ['card']
+            });
+            res.send({clientSecret: paymentIntent.client_secret})
+        });
 
         app.get('/part', async(req, res) => {
             const query = {};
@@ -115,6 +129,15 @@ async function run(){
             else{
                 return res.status(403).send({message: 'forbidden access'})
             }
+        });
+
+        // payment
+
+        app.get('/booking/:id', verifyJWT, async(req, res) => {
+            const id = req.params.id;
+            const query = {_id: ObjectId(id)};
+            const booking = await bookingCollection.findOne(query);
+            res.send(booking);
         })
 
         app.post('/booking', async(req, res) => {
