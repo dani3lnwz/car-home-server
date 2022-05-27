@@ -37,6 +37,8 @@ async function run(){
         const bookingCollection = client.db('all-in-one').collection('bookings');
 
         const userCollection = client.db('all-in-one').collection('users');
+        const paymentCollection = client.db('all-in-one').collection('payments');
+        const reviewCollection = client.db('all-in-one').collection('review');
 
         // const toolCollection = client.db('all-in-one').collection('tools');
 
@@ -146,6 +148,23 @@ async function run(){
             res.send(result);
         })
 
+        app.patch('/booking/:id', verifyJWT, async(req, res)=>{
+            const id= req.params.id;
+            const payment = req.body;
+            const filter = {_id: ObjectId(id)};
+            const updatedDoc = {
+                $set: {
+                    paid: true,
+                    transactionId: payment.transactionId,
+                }
+            }
+
+            const result = await paymentCollection.insertOne(payment);
+            const updatedBooking = await bookingCollection.updateOne(filter, updatedDoc);
+            res.send(updatedDoc);
+
+        })
+
         app.put("/part/:id", async(req, res) => {
             const id = req.params.id;
             // console.log(id)
@@ -169,6 +188,21 @@ async function run(){
             const tool = req.body;
             const result = await partCollection.insertOne(tool);
             res.send(result);
+        });
+
+        // add review
+        app.post('/review',verifyJWT, async(req, res) => {
+            const review = req.body;
+            const result = await reviewCollection.insertOne(review);
+            res.send(result);
+        })
+
+        app.get('/review', async (req, res) => {
+            // const id = req.params.id;
+            const query = { };
+            const cursor = reviewCollection.find(query)
+            const review = await cursor.toArray();
+            res.send(review);
         });
 
         // delete
