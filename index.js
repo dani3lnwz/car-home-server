@@ -10,7 +10,7 @@ const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 
 // app.use(cors());
 // app.use(cors({headers:{"Access-Control-Allow-Origin":"https://all-in-one-95e03.web.app/"}}))
-app.use(cors({origin: 'https://all-in-one-95e03.web.app/'}))
+app.use(cors({origin: 'https://all-in-one-95e03.web.app'}))
 app.use(express.json())
 
 const uri = "mongodb+srv://dbUser1:test1234@cluster0.7rfww.mongodb.net/?retryWrites=true&w=majority";
